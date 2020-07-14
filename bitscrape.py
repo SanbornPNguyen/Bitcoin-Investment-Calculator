@@ -1,14 +1,40 @@
-import requests
+import requests, csv, datetime, decimal
 from bs4 import BeautifulSoup
 
-URL = "https://coinmarketcap.com/currencies/bitcoin/historical-data/?start=20130428&end=20200713"
-page = requests.get(URL)
+def scrape():
+	FIRST_DATE = "20130428"
+	YESTERDAY_DATE = generate_day_string()
 
-soup = BeautifulSoup(page.content, "html.parser")
+	URL = "https://coinmarketcap.com/currencies/bitcoin/historical-data/?start={}&end={}".format(FIRST_DATE, YESTERDAY_DATE)
+	page = requests.get(URL)
 
-rows = soup.find_all("tr", {"class": "cmc-table-row"})
+	soup = BeautifulSoup(page.content, "html.parser")
 
-for row in rows:
-	print(row.find_all("div")[0].text)
-	for element in row.find_all("div")[1::]:
-		print(element.text, end = " ")
+	rows = soup.find_all("tr", {"class": "cmc-table-row"})
+
+	build_csv(rows)
+
+def build_csv(rows):
+	with open("data.csv", "w", newline="") as file:
+		writer = csv.writer(file)
+		writer.writerow(["Date", "Open", "High", "Low", "Close", "Volume", "Market Cap"])
+
+		for row in rows:
+			row_as_list = list()
+			for element in row.find_all("div"):
+				try:
+					row_as_list.append(int(element.text.replace(",", "")))
+				except ValueError:
+					try:
+						row_as_list.append(decimal.Decimal(element.text.replace(",", "")))
+					except:
+						row_as_list.append(element.text)
+
+			writer.writerow(row_as_list)
+
+def generate_day_string():
+	today = datetime.datetime.now()
+	date_str = today.strftime("%Y") + today.strftime("%m") + str(int(today.strftime("%d")) - 1)
+	return date_str
+
+scrape()
