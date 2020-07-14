@@ -36,5 +36,3 @@ def generate_day_string():
 	today = datetime.datetime.now()
 	date_str = today.strftime("%Y") + today.strftime("%m") + str(int(today.strftime("%d")) - 1)
 	return date_str
-
-scrape()
