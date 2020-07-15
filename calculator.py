@@ -4,8 +4,7 @@ import pandas as pd
 def update():
 	bitscrape.scrape()
 
-def calculate_return(buy_amount_dollars, buy_date="Apr 28, 2013", sell_date="Jul 13, 2020"):
-	update()
+def calculate_return(buy_amount_dollars, buy_date="Apr 28, 2013", sell_date="Jul 14, 2020"):
 	df = pd.read_csv("data.csv")
 
 	buy_high =  float(df.loc[df['Date'] == buy_date]["High"])
